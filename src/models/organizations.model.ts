@@ -47,6 +47,9 @@ const organizationSchema = new mongoose.Schema<IOrganization>(
 
 organizationSchema.add(auditSchemaFields);
 
+organizationSchema.index({ owner: 1 });
+organizationSchema.index({ category: 1 });
+
 const Organization = mongoose.model<IOrganization>(
   "Organization",
   organizationSchema,

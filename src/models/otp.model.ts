@@ -36,6 +36,9 @@ const otpSchema = new mongoose.Schema<IOtp>(
 
 otpSchema.add(auditSchemaFields);
 
+otpSchema.index({ phone: 1, purpose: 1, otp: 1, expiresAt: 1 });
+otpSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+
 const Otp = mongoose.model<IOtp>("Otp", otpSchema);
 
 export default Otp;

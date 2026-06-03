@@ -38,6 +38,8 @@ const rewardSchema = new mongoose.Schema<IReward>(
 
 rewardSchema.add(auditSchemaFields);
 
+rewardSchema.index({ organization: 1, isActive: 1 });
+
 const Reward = mongoose.model<IReward>("Reward", rewardSchema);
 
 export default Reward;

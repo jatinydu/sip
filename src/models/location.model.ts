@@ -61,6 +61,8 @@ const locationSchema = new mongoose.Schema<ILocation>(
 
 locationSchema.add(auditSchemaFields);
 
+locationSchema.index({ branch_owner: 1, isPrimary: 1 });
+
 const Location = mongoose.model<ILocation>("Location", locationSchema);
 
 export default Location;

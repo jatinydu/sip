@@ -40,6 +40,8 @@ const staffSchema = new mongoose.Schema<IStaff>(
 
 staffSchema.add(auditSchemaFields);
 
+staffSchema.index({ organization: 1, location: 1, isActive: 1 });
+
 const Staff = mongoose.model<IStaff>("Staff", staffSchema);
 
 export default Staff;
