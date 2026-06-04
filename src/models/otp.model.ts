@@ -3,15 +3,18 @@ import { OtpPurpose } from "./enums";
 import { auditSchemaFields, baseSchemaOptions } from "./baseSchema";
 
 interface IOtp extends mongoose.Document {
-  otp: string;
+  otpHash: string;
   phone: string;
   expiresAt: Date;
   purpose: OtpPurpose;
+  attempts: number;
+  varifiedAt?: Date;
+  resendCount: number;
 }
 
 const otpSchema = new mongoose.Schema<IOtp>(
   {
-    otp: {
+    otpHash: {
       type: String,
       required: true,
       trim: true,
@@ -30,13 +33,27 @@ const otpSchema = new mongoose.Schema<IOtp>(
       enum: OtpPurpose,
       required: true,
     },
+    attempts: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
+    varifiedAt: {
+      type: Date,
+      required: false,
+    },
+    resendCount: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
   },
   baseSchemaOptions,
 );
 
 otpSchema.add(auditSchemaFields);
 
-otpSchema.index({ phone: 1, purpose: 1, otp: 1, expiresAt: 1 });
+otpSchema.index({ phone: 1, purpose: 1, otpHash: 1, expiresAt: 1 });
 otpSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
 const Otp = mongoose.model<IOtp>("Otp", otpSchema);
