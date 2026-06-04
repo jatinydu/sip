@@ -1,15 +1,23 @@
 import mongoose from "mongoose";
-import { OtpPurpose } from "./enums";
+import { OtpChannel, OtpPurpose } from "./enums";
 import { auditSchemaFields, baseSchemaOptions } from "./baseSchema";
 
-interface IOtp extends mongoose.Document {
+export interface IOtp extends mongoose.Document {
   otpHash: string;
-  phone: string;
+  channel: OtpChannel;
+  phone?: string;
+  email?: string;
+  ipAddress?: string;
   expiresAt: Date;
   purpose: OtpPurpose;
   attempts: number;
-  varifiedAt?: Date;
+  verifiedAt?: Date;
+  lastSentAt?: Date;
   resendCount: number;
+  createdBy?: mongoose.Types.ObjectId;
+  updatedBy?: mongoose.Types.ObjectId;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const otpSchema = new mongoose.Schema<IOtp>(
@@ -19,9 +27,25 @@ const otpSchema = new mongoose.Schema<IOtp>(
       required: true,
       trim: true,
     },
+    channel: {
+      type: String,
+      enum: OtpChannel,
+      required: true,
+    },
     phone: {
       type: String,
-      required: true,
+      required: false,
+      trim: true,
+    },
+    email: {
+      type: String,
+      required: false,
+      lowercase: true,
+      trim: true,
+    },
+    ipAddress: {
+      type: String,
+      required: false,
       trim: true,
     },
     expiresAt: {
@@ -38,7 +62,11 @@ const otpSchema = new mongoose.Schema<IOtp>(
       required: true,
       default: 0,
     },
-    varifiedAt: {
+    verifiedAt: {
+      type: Date,
+      required: false,
+    },
+    lastSentAt: {
       type: Date,
       required: false,
     },
@@ -53,9 +81,13 @@ const otpSchema = new mongoose.Schema<IOtp>(
 
 otpSchema.add(auditSchemaFields);
 
-otpSchema.index({ phone: 1, purpose: 1, otpHash: 1, expiresAt: 1 });
+otpSchema.index({ email: 1, purpose: 1, channel: 1, expiresAt: 1 });
+otpSchema.index({ phone: 1, purpose: 1, channel: 1, expiresAt: 1 });
+otpSchema.index({ ipAddress: 1, purpose: 1, channel: 1, createdAt: 1 });
 otpSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
-const Otp = mongoose.model<IOtp>("Otp", otpSchema);
+const Otp =
+  (mongoose.models.Otp as mongoose.Model<IOtp> | undefined) ||
+  mongoose.model<IOtp>("Otp", otpSchema);
 
 export default Otp;

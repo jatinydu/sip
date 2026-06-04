@@ -1,13 +1,16 @@
 import mongoose from "mongoose";
-import { UserTypes } from "./enums";
+import { BusinessOnboardingStatus, UserTypes } from "./enums";
 import { auditSchemaFields, baseSchemaOptions } from "./baseSchema";
 
-interface IUser extends mongoose.Document {
+export interface IUser extends mongoose.Document {
   firstName: string;
   lastName: string;
-  phone: string;
-  isPhoneVerified: boolean;
+  phone?: string;
+  email?: string;
+  passwordHash?: string;
+  isVerified: boolean;
   userType: UserTypes;
+  businessOnboardingStatus?: BusinessOnboardingStatus;
 }
 
 const userSchema = new mongoose.Schema<IUser>(
@@ -24,11 +27,21 @@ const userSchema = new mongoose.Schema<IUser>(
     },
     phone: {
       type: String,
-      required: [true, "Phone number is required"],
-      unique: true,
+      required: false,
       trim: true,
     },
-    isPhoneVerified: {
+    passwordHash: {
+      type: String,
+      required: false,
+      select: false, // never returned in queries unless explicitly projected
+    },
+    email: {
+      type: String,
+      required: false,
+      lowercase: true,
+      trim: true,
+    },
+    isVerified: {
       type: Boolean,
       default: false,
     },
@@ -37,12 +50,23 @@ const userSchema = new mongoose.Schema<IUser>(
       enum: UserTypes,
       default: UserTypes.CUSTOMER,
     },
+    businessOnboardingStatus: {
+      type: String,
+      enum: BusinessOnboardingStatus,
+      required: false,
+    },
   },
   baseSchemaOptions,
 );
 
 userSchema.add(auditSchemaFields);
 
-const User = mongoose.model<IUser>("User", userSchema);
+userSchema.index({ phone: 1 }, { unique: true, sparse: true });
+userSchema.index({ email: 1 }, { unique: true, sparse: true });
+userSchema.index({ userType: 1, businessOnboardingStatus: 1 });
+
+const User =
+  (mongoose.models.User as mongoose.Model<IUser> | undefined) ||
+  mongoose.model<IUser>("User", userSchema);
 
 export default User;

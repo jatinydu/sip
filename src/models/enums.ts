@@ -5,6 +5,16 @@ export enum UserTypes {
 }
 
 export enum OtpPurpose {
-    SIGNUP = "signup",
-    FORGET_PASSWORD = "forget_password",
+  SIGNUP = "signup",
+  FORGET_PASSWORD = "forget_password",
+}
+
+export enum OtpChannel {
+  EMAIL = "email",
+  PHONE = "phone",
+}
+
+export enum BusinessOnboardingStatus {
+  PENDING = "pending",
+  COMPLETED = "completed",
 }
