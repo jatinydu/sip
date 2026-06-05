@@ -6,6 +6,7 @@ import User from "@/models/users.model";
 import { verifyOtpSchema } from "@/validations/otpSchema";
 import { StatusCodes } from "http-status-codes";
 import { NextRequest, NextResponse } from "next/server";
+import { generateAccessToken, generateRefreshToken } from "@/lib/utils/jwt";
 
 export async function POST(req: NextRequest) {
   const session = await mongoose.startSession();
@@ -105,12 +106,25 @@ export async function POST(req: NextRequest) {
 
     session.startTransaction();
 
+    let accessToken = "";
+    let refreshToken = "";
+
     switch (purpose) {
       case OtpPurpose.SIGNUP: {
         user.isVerifiedEmail = true;
 
         await user.save({
           session,
+        });
+
+        accessToken = generateAccessToken({
+          userId: user._id.toString(),
+          userType: user.userType,
+        });
+
+        refreshToken = generateRefreshToken({
+          userId: user._id.toString(),
+          userType: user.userType,
         });
 
         break;
@@ -129,16 +143,37 @@ export async function POST(req: NextRequest) {
 
     await session.commitTransaction();
 
-    return NextResponse.json(
+    const response = NextResponse.json(
       {
         success: true,
         message: "Email verified successfully",
-        isVerified: true,
+        user: {
+          email: user.email,
+          userType: user.userType,
+          id: user._id,
+          isVerified: user.isVerifiedEmail,
+        },
+        ...(purpose === OtpPurpose.SIGNUP && {
+          accessToken,
+          nextStep: "business_onboarding",
+        }),
       },
       {
         status: StatusCodes.OK,
       },
     );
+
+    if (purpose === OtpPurpose.SIGNUP) {
+      response.cookies.set("refresh-token", refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production" ? true : false,
+        sameSite: "strict",
+        maxAge: 60 * 60 * 24 * 30,
+        path: "/",
+      });
+    }
+
+    return response;
   } catch (error) {
     await session.abortTransaction();
 
