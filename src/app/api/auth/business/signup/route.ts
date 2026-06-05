@@ -3,9 +3,11 @@ import { UserTypes } from "@/models/enums";
 import User from "@/models/users.model";
 import { businessSignupSchema } from "@/validations/signupSchema";
 import { NextRequest, NextResponse } from "next/server";
+import { connectDB } from "@/lib/configs/mongodb";
 
 export async function POST(req: NextRequest) {
   try {
+    await connectDB();
     const body = await req.json();
 
     const parsedBody = businessSignupSchema.safeParse(body);
@@ -24,7 +26,9 @@ export async function POST(req: NextRequest) {
     const { email, password, name } = parsedBody.data;
 
     // check if email exists
-    const isUserExist = await User.findOne({ email });
+    const isUserExist = await User.findOne({
+      email: email.toLowerCase().trim(),
+    });
 
     if (isUserExist && isUserExist.isVerifiedEmail) {
       return NextResponse.json(
@@ -38,13 +42,13 @@ export async function POST(req: NextRequest) {
 
     // if user exists but not verified, delete it and create new one
     if (isUserExist && !isUserExist.isVerifiedEmail) {
-      await User.deleteOne({ email });
+      await User.deleteOne({ email: email.toLowerCase().trim() });
     }
 
     const passwordHash = await hashPassword(password);
 
     const user = await User.create({
-      email,
+      email: email.toLowerCase().trim(),
       passwordHash,
       name,
       userType: UserTypes.BUSINESS,
