@@ -1,5 +1,4 @@
 import { Resend } from "resend";
-import { generateOtp } from "./otp";
 import { BusinessEmailOtp } from "@/emails/business-email-otp";
 
 const resend = new Resend(process.env.RESEND_API_KEY as string);
@@ -7,12 +6,12 @@ const resend = new Resend(process.env.RESEND_API_KEY as string);
 export const sendBusinessSignupOtp = async ({
   email,
   name,
+  otp,
 }: {
   email: string;
   name: string;
+  otp: string;
 }) => {
-  const otp = generateOtp(6);
-
   await resend.emails.send({
     from: process.env.EMAIL_FROM as string,
     to: email,

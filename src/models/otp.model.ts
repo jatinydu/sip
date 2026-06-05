@@ -59,9 +59,22 @@ const otpSchema = new mongoose.Schema<IOtp>(
 
 otpSchema.add(auditSchemaFields);
 
-otpSchema.index({ email: 1, purpose: 1, channel: 1, expiresAt: 1 });
 otpSchema.index({ phone: 1, purpose: 1, channel: 1, expiresAt: 1 });
 otpSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+// unique constraint to prevent multiple otp for same user for same purpose
+otpSchema.index(
+  {
+    email: 1,
+    purpose: 1,
+    channel: 1,
+  },
+  {
+    unique: true,
+    partialFilterExpression: {
+      isConsumed: false,
+    },
+  },
+);
 
 const Otp =
   (mongoose.models.Otp as mongoose.Model<IOtp> | undefined) ||
