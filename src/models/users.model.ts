@@ -3,8 +3,7 @@ import { BusinessOnboardingStatus, UserTypes } from "./enums";
 import { auditSchemaFields, baseSchemaOptions } from "./baseSchema";
 
 export interface IUser extends mongoose.Document {
-  firstName: string;
-  lastName: string;
+  name: string;
   phone?: string;
   email?: string;
   passwordHash?: string;
@@ -16,15 +15,10 @@ export interface IUser extends mongoose.Document {
 
 const userSchema = new mongoose.Schema<IUser>(
   {
-    firstName: {
+    name: {
       type: String,
       required: true,
-      trim: true,
-    },
-    lastName: {
-      type: String,
-      required: true,
-      trim: true,
+      trim: false,
     },
     phone: {
       type: String,
