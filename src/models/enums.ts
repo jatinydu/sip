@@ -6,7 +6,9 @@ export enum UserTypes {
 
 export enum OtpPurpose {
   SIGNUP = "signup",
-  FORGET_PASSWORD = "forget_password",
+  RESET_PASSWORD = "reset_password",
+  CHANGE_EMAIL = "change_email",
+  CHANGE_PHONE = "change_phone",
 }
 
 export enum OtpChannel {

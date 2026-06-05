@@ -8,7 +8,8 @@ export interface IUser extends mongoose.Document {
   phone?: string;
   email?: string;
   passwordHash?: string;
-  isVerified: boolean;
+  isVerifiedEmail?: boolean;
+  isVerifiedPhone?: boolean;
   userType: UserTypes;
   businessOnboardingStatus?: BusinessOnboardingStatus;
 }
@@ -41,7 +42,11 @@ const userSchema = new mongoose.Schema<IUser>(
       lowercase: true,
       trim: true,
     },
-    isVerified: {
+    isVerifiedEmail: {
+      type: Boolean,
+      default: false,
+    },
+    isVerifiedPhone: {
       type: Boolean,
       default: false,
     },
