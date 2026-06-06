@@ -7,6 +7,7 @@ interface ILocation extends mongoose.Document {
   city: string;
   country: string;
   staffs: mongoose.Types.ObjectId[];
+  organization: mongoose.Types.ObjectId;
   branch_owner: mongoose.Types.ObjectId;
   slug: string;
   qr_code: string;
@@ -37,6 +38,11 @@ const locationSchema = new mongoose.Schema<ILocation>(
         ref: "Staff",
       },
     ],
+    organization: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Organization",
+      required: true,
+    },
     branch_owner: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

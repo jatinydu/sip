@@ -34,10 +34,7 @@ export const verifyRefreshToken = (token: string): TokenPayload => {
 export const getAuthUser = (req: NextRequest): TokenPayload => {
   const token = req.headers.get("authorization")?.replace("Bearer ", "");
 
-  if (!token)
-    throw new Error(
-      "Unauthorized",
-    );
+  if (!token) throw new Error("Unauthorized");
 
   return verifyAccessToken(token);
 };
