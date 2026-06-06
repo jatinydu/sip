@@ -11,7 +11,10 @@ import { BusinessOnboardingStatus, UserTypes } from "@/models/enums";
 import { getBusinessAuthUser } from "@/lib/utils/jwt";
 
 import { businessOnboardingSchema } from "@/validations/businessOnboardingSchema";
+
 import { generateSlug } from "@/lib/utils";
+import { generateQrImage } from "@/lib/utils/qr";
+import { uploadQrCode } from "@/lib/utils/uploadToCloudinary";
 
 export async function POST(req: NextRequest) {
   const session = await mongoose.startSession();
@@ -98,6 +101,8 @@ export async function POST(req: NextRequest) {
 
     session.startTransaction();
 
+    const orgSlug = generateSlug(organizationName);
+
     const [organization] = await Organization.create(
       [
         {
@@ -105,13 +110,21 @@ export async function POST(req: NextRequest) {
           owner: user._id,
           category: categoryId,
           logo: logo ?? "",
-          slug: generateSlug(organizationName),
+          slug: orgSlug,
         },
       ],
       {
         session,
       },
     );
+
+    const locationSlug = generateSlug(locationName);
+
+    const qrValue = `${process.env.NEXT_PUBLIC_APP_URL}/checkin/${organization.slug}/${locationSlug}`;
+
+    const qrImageBase64 = await generateQrImage(qrValue);
+
+    const qrUpload = await uploadQrCode(qrImageBase64);
 
     const [location] = await Location.create(
       [
@@ -125,7 +138,11 @@ export async function POST(req: NextRequest) {
 
           branch_owner: user._id,
 
-          slug: generateSlug(locationName),
+          slug: locationSlug,
+
+          qr_code: qrUpload.secure_url,
+
+          qr_value: qrValue,
 
           isPrimary: true,
         },
@@ -164,6 +181,8 @@ export async function POST(req: NextRequest) {
           id: location._id,
           name: location.name,
           slug: location.slug,
+          qrCode: location.qr_code,
+          qrValue: location.qr_value,
         },
 
         nextStep: "dashboard",

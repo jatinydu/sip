@@ -11,6 +11,7 @@ interface ILocation extends mongoose.Document {
   branch_owner: mongoose.Types.ObjectId;
   slug: string;
   qr_code: string;
+  qr_value: string;
   isPrimary: boolean;
 }
 
@@ -54,6 +55,10 @@ const locationSchema = new mongoose.Schema<ILocation>(
       unique: true,
     },
     qr_code: {
+      type: String,
+      default: "",
+    },
+    qr_value: {
       type: String,
       default: "",
     },
