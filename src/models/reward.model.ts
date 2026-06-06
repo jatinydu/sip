@@ -1,13 +1,13 @@
 import mongoose from "mongoose";
 import { auditSchemaFields, baseSchemaOptions } from "./baseSchema";
 
-interface IReward extends mongoose.Document {
-  rewardValue: string;
+export interface IReward extends mongoose.Document {
+  rewardTitle: string;
   description?: string;
 
   requiredVisits: number;
 
-  rules?: string[];
+  rules: string[];
 
   organization: mongoose.Types.ObjectId;
 
@@ -16,24 +16,28 @@ interface IReward extends mongoose.Document {
 
 const rewardSchema = new mongoose.Schema<IReward>(
   {
-    rewardValue: {
+    rewardTitle: {
       type: String,
       required: true,
+      trim: true,
+      maxlength: 100,
     },
+
     description: {
       type: String,
-      required: false,
+      trim: true,
+      maxlength: 500,
     },
+
     requiredVisits: {
       type: Number,
       required: true,
+      min: 1,
     },
-    rules: [
-      {
-        type: String,
-        required: false,
-      },
-    ],
+    rules: {
+      type: [String],
+      default: [],
+    },
     organization: {
       type: mongoose.Types.ObjectId,
       ref: "Organization",
@@ -51,6 +55,8 @@ rewardSchema.add(auditSchemaFields);
 
 rewardSchema.index({ organization: 1, isActive: 1 });
 
-const Reward = mongoose.model<IReward>("Reward", rewardSchema);
+const Reward =
+  (mongoose.models.Reward as mongoose.Model<IReward> | undefined) ||
+  mongoose.model<IReward>("Reward", rewardSchema);
 
 export default Reward;
