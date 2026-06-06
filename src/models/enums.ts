@@ -20,3 +20,8 @@ export enum BusinessOnboardingStatus {
   PENDING = "pending",
   COMPLETED = "completed",
 }
+
+export enum StaffRoles {
+  BRANCH_ADMIN = "branch_admin",
+  STAFF = "staff",
+}
