@@ -8,7 +8,7 @@ import Location from "@/models/location.model";
 
 import { BusinessOnboardingStatus, UserTypes } from "@/models/enums";
 
-import { getAuthUser } from "@/lib/utils/jwt";
+import { getBusinessAuthUser } from "@/lib/utils/jwt";
 
 import { businessOnboardingSchema } from "@/validations/businessOnboardingSchema";
 import { generateSlug } from "@/lib/utils";
@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
   const session = await mongoose.startSession();
 
   try {
-    const authUser = getAuthUser(req);
+    const authUser = getBusinessAuthUser(req);
 
     const body = await req.json();
 

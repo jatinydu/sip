@@ -5,7 +5,7 @@ import mongoose from "mongoose";
 import Reward from "@/models/reward.model";
 import Organization from "@/models/organizations.model";
 
-import { getAuthUser } from "@/lib/utils/jwt";
+import { getBusinessAuthUser } from "@/lib/utils/jwt";
 
 import { updateRewardSchema } from "@/validations/rewardSchema";
 
@@ -17,7 +17,7 @@ interface RouteParams {
 
 export async function PATCH(req: NextRequest, { params }: RouteParams) {
   try {
-    const authUser = getAuthUser(req);
+    const authUser = getBusinessAuthUser(req);
 
     const { rewardId } = await params;
 

@@ -5,7 +5,7 @@ import Reward from "@/models/reward.model";
 import Organization from "@/models/organizations.model";
 import User from "@/models/users.model";
 
-import { getAuthUser } from "@/lib/utils/jwt";
+import { getBusinessAuthUser } from "@/lib/utils/jwt";
 
 import { createRewardSchema } from "@/validations/rewardSchema";
 
@@ -14,7 +14,7 @@ import { MongoServerError } from "mongodb";
 
 export async function POST(req: NextRequest) {
   try {
-    const authUser = getAuthUser(req);
+    const authUser = getBusinessAuthUser(req);
 
     const body = await req.json();
 
@@ -166,7 +166,7 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   try {
-    const authUser = getAuthUser(req);
+    const authUser = getBusinessAuthUser(req);
 
     const organization = await Organization.findOne({
       owner: authUser.userId,

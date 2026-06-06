@@ -5,7 +5,7 @@ import { StatusCodes } from "http-status-codes";
 
 import User from "@/models/users.model";
 
-import { generateAccessToken, generateRefreshToken } from "@/lib/utils/jwt";
+import { generateBusinessAccessToken, generateBusinessRefreshToken } from "@/lib/utils/jwt";
 
 import { verifyPassword } from "@/lib/utils/password";
 
@@ -96,12 +96,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const accessToken = generateAccessToken({
+    const accessToken = generateBusinessAccessToken({
       userId: user._id.toString(),
       userType: user.userType,
     });
 
-    const refreshToken = generateRefreshToken({
+    const refreshToken = generateBusinessRefreshToken({
       userId: user._id.toString(),
       userType: user.userType,
     });

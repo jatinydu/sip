@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { StatusCodes } from "http-status-codes";
 import { NextResponse } from "next/server";
 
-import { generateAccessToken, verifyRefreshToken } from "@/lib/utils/jwt";
+import { generateBusinessAccessToken, verifyBusinessRefreshToken } from "@/lib/utils/jwt";
 
 export async function POST() {
   try {
@@ -20,9 +20,9 @@ export async function POST() {
       );
     }
 
-    const payload = verifyRefreshToken(refreshToken);
+    const payload = verifyBusinessRefreshToken(refreshToken);
 
-    const accessToken = generateAccessToken({
+    const accessToken = generateBusinessAccessToken({
       userId: payload.userId,
       userType: payload.userType,
     });

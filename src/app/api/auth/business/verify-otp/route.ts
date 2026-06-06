@@ -6,7 +6,7 @@ import User from "@/models/users.model";
 import { verifyOtpSchema } from "@/validations/otpSchema";
 import { StatusCodes } from "http-status-codes";
 import { NextRequest, NextResponse } from "next/server";
-import { generateAccessToken, generateRefreshToken } from "@/lib/utils/jwt";
+import { generateBusinessAccessToken, generateBusinessRefreshToken } from "@/lib/utils/jwt";
 
 export async function POST(req: NextRequest) {
   const session = await mongoose.startSession();
@@ -131,12 +131,12 @@ export async function POST(req: NextRequest) {
           session,
         });
 
-        accessToken = generateAccessToken({
+        accessToken = generateBusinessAccessToken({
           userId: user._id.toString(),
           userType: user.userType,
         });
 
-        refreshToken = generateRefreshToken({
+        refreshToken = generateBusinessRefreshToken({
           userId: user._id.toString(),
           userType: user.userType,
         });
