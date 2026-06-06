@@ -16,6 +16,8 @@ export const updateStaffSchema = z.object({
 
   role: z.enum(StaffRoles).optional(),
 
+  username: z.string().optional(),
+
   isActive: z.boolean().optional(),
 });
 
@@ -24,3 +26,7 @@ export const staffLoginSchema = z.object({
 
   password: z.string().min(1),
 });
+
+export type UpdateStaffSchema = z.infer<typeof updateStaffSchema>;
+export type CreateStaffSchema = z.infer<typeof createStaffSchema>;
+export type StaffLoginSchema = z.infer<typeof staffLoginSchema>;

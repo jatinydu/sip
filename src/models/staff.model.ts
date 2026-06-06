@@ -1,8 +1,12 @@
 import mongoose from "mongoose";
-import { auditSchemaFields, baseSchemaOptions } from "./baseSchema";
+import {
+  auditSchemaFields,
+  baseSchemaOptions,
+  IBaseDocument,
+} from "./baseSchema";
 import { StaffRoles } from "./enums";
 
-export interface IStaff extends mongoose.Document {
+export interface IStaff extends IBaseDocument {
   username: string;
   passwordHash: string;
   role: StaffRoles;
