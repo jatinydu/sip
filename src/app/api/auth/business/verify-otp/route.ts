@@ -69,6 +69,18 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    if (purpose === OtpPurpose.RESET_PASSWORD && !user.isVerifiedEmail) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Email not verified",
+        },
+        {
+          status: StatusCodes.BAD_REQUEST,
+        },
+      );
+    }
+
     const otpRecord = await Otp.findOne({
       email: normalizedEmail,
       purpose,
@@ -109,6 +121,8 @@ export async function POST(req: NextRequest) {
     let accessToken = "";
     let refreshToken = "";
 
+    let responseMsg = "Otp verified succesfully!";
+
     switch (purpose) {
       case OtpPurpose.SIGNUP: {
         user.isVerifiedEmail = true;
@@ -127,6 +141,13 @@ export async function POST(req: NextRequest) {
           userType: user.userType,
         });
 
+        responseMsg = "Signup email verified succesfully!";
+
+        break;
+      }
+
+      case OtpPurpose.RESET_PASSWORD: {
+        responseMsg = "Password reset verification succesafull!";
         break;
       }
 
@@ -143,19 +164,27 @@ export async function POST(req: NextRequest) {
 
     await session.commitTransaction();
 
+    const userData =
+      purpose === OtpPurpose.SIGNUP
+        ? {
+            email: user.email,
+            userType: user.userType,
+            id: user._id,
+            isVerified: user.isVerifiedEmail,
+          }
+        : null;
+
     const response = NextResponse.json(
       {
         success: true,
-        message: "Email verified successfully",
-        user: {
-          email: user.email,
-          userType: user.userType,
-          id: user._id,
-          isVerified: user.isVerifiedEmail,
-        },
+        message: responseMsg,
+        user: userData,
         ...(purpose === OtpPurpose.SIGNUP && {
           accessToken,
           nextStep: "business_onboarding",
+        }),
+        ...(purpose === OtpPurpose.RESET_PASSWORD && {
+          canResetPassword: true,
         }),
       },
       {

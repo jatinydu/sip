@@ -1,4 +1,4 @@
-import { sendBusinessSignupOtp } from "@/lib/utils/email";
+import { sendBusinessSignupOtp, sendResetPasswordOtp } from "@/lib/utils/email";
 import { generateOtp, hashOtp } from "@/lib/utils/otp";
 import { OtpChannel, OtpPurpose, UserTypes } from "@/models/enums";
 import Otp from "@/models/otp.model";
@@ -61,6 +61,18 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    if (purpose === OtpPurpose.RESET_PASSWORD && !user.isVerifiedEmail) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Email not verified",
+        },
+        {
+          status: StatusCodes.BAD_REQUEST,
+        },
+      );
+    }
+
     const existingOtp = await Otp.findOne({
       email: normalizedEmail,
       purpose,
@@ -91,19 +103,10 @@ export async function POST(req: NextRequest) {
         otpHash,
         expiresAt: new Date(Date.now() + 10 * 60 * 1000),
       });
-    } catch (error: any) {
-      if (error?.code === 11000) {
-        return NextResponse.json(
-          {
-            success: false,
-            message: "OTP already sent. Please use the existing OTP.",
-          },
-          {
-            status: StatusCodes.CONFLICT,
-          },
-        );
-      }
-
+    } catch (error) {
+      const errorMsg =
+        error instanceof Error ? error.message : "error while saving otp";
+      console.log("/business/send-otp :: ", errorMsg);
       return NextResponse.json(
         {
           success: false,
@@ -116,12 +119,25 @@ export async function POST(req: NextRequest) {
     }
 
     try {
-      await sendBusinessSignupOtp({
-        email: normalizedEmail,
-        name: user.name,
-        otp,
-      });
-    } catch (emailError) {
+      if (purpose === OtpPurpose.SIGNUP) {
+        await sendBusinessSignupOtp({
+          email: normalizedEmail,
+          name: user.name,
+          otp,
+        });
+      } else if (purpose === OtpPurpose.RESET_PASSWORD) {
+        await sendResetPasswordOtp({
+          email: normalizedEmail,
+          name: user.name,
+          otp,
+        });
+      } else {
+        throw Error("wrong purpose passed!");
+      }
+    } catch (error) {
+      const errorMsg =
+        error instanceof Error ? error.message : "Error sending otp!";
+      console.log("/business/sendotp :: ", errorMsg);
       return NextResponse.json(
         {
           success: false,
@@ -140,7 +156,7 @@ export async function POST(req: NextRequest) {
       },
       { status: StatusCodes.OK },
     );
-  } catch (error: any) {
+  } catch (error) {
     console.error(error);
 
     return NextResponse.json(

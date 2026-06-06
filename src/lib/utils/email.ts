@@ -1,5 +1,6 @@
 import { Resend } from "resend";
 import { BusinessEmailOtp } from "@/emails/business-email-otp";
+import { ResetPasswordOtp } from "@/emails/reset-password";
 
 const resend = new Resend(process.env.RESEND_API_KEY as string);
 
@@ -17,5 +18,22 @@ export const sendBusinessSignupOtp = async ({
     to: email,
     subject: "Welcome to Sip! Verify Your Email",
     react: BusinessEmailOtp({ firstName: name, otp }),
+  });
+};
+
+export const sendResetPasswordOtp = async ({
+  email,
+  name,
+  otp,
+}: {
+  email: string;
+  name: string;
+  otp: string;
+}) => {
+  await resend.emails.send({
+    from: process.env.EMAIL_FROM as string,
+    to: email,
+    subject: "Verify Your Email to Reset Password - SIP",
+    react: ResetPasswordOtp({ firstName: name, otp }),
   });
 };
