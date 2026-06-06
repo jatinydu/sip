@@ -163,3 +163,53 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+export async function GET(req: NextRequest) {
+  try {
+    const authUser = getAuthUser(req);
+
+    const organization = await Organization.findOne({
+      owner: authUser.userId,
+    }).lean();
+
+    if (!organization) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Organization not found",
+        },
+        {
+          status: StatusCodes.NOT_FOUND,
+        },
+      );
+    }
+
+    const rewards = await Reward.findOne({
+      organization: organization._id,
+      isDeleted: false,
+    }).lean();
+
+    return NextResponse.json(
+      {
+        success: true,
+        message: "All rewards Fetched successfully!",
+        rewards,
+      },
+      {
+        status: StatusCodes.OK,
+      },
+    );
+  } catch (error) {
+    console.error(error);
+
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Internal server error",
+      },
+      {
+        status: StatusCodes.INTERNAL_SERVER_ERROR,
+      },
+    );
+  }
+}
