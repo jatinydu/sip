@@ -170,6 +170,7 @@ export async function GET(req: NextRequest) {
 
     const organization = await Organization.findOne({
       owner: authUser.userId,
+      isDeleted: false,
     }).lean();
 
     if (!organization) {
