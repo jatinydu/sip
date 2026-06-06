@@ -55,6 +55,18 @@ rewardSchema.add(auditSchemaFields);
 
 rewardSchema.index({ organization: 1, isActive: 1 });
 
+rewardSchema.index(
+  {
+    organization: 1,
+  },
+  {
+    unique: true,
+    partialFilterExpression: {
+      isActive: true,
+    },
+  },
+);
+
 const Reward =
   (mongoose.models.Reward as mongoose.Model<IReward> | undefined) ||
   mongoose.model<IReward>("Reward", rewardSchema);

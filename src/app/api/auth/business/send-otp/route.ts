@@ -5,6 +5,7 @@ import Otp from "@/models/otp.model";
 import User from "@/models/users.model";
 import { sendOtpSchema } from "@/validations/otpSchema";
 import { StatusCodes } from "http-status-codes";
+import { MongoServerError } from "mongodb";
 import { NextResponse, NextRequest } from "next/server";
 
 export async function POST(req: NextRequest) {
@@ -103,19 +104,20 @@ export async function POST(req: NextRequest) {
         otpHash,
         expiresAt: new Date(Date.now() + 10 * 60 * 1000),
       });
-    } catch (error) {
-      const errorMsg =
-        error instanceof Error ? error.message : "error while saving otp";
-      console.log("/business/send-otp :: ", errorMsg);
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Internal server error",
-        },
-        {
-          status: StatusCodes.INTERNAL_SERVER_ERROR,
-        },
-      );
+    } catch (error: unknown) {
+      if (error instanceof MongoServerError && error.code === 11000) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: "An active otp already exists.",
+          },
+          {
+            status: StatusCodes.CONFLICT,
+          },
+        );
+      }
+
+      throw error;
     }
 
     try {
