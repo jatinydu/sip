@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 
@@ -17,7 +18,7 @@ const NAV_LINKS = [
 
 export function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
+  const router = useRouter();
   return (
     <header className="relative z-50">
       <div className="section-container">
@@ -35,7 +36,10 @@ export function Navbar() {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden items-center gap-8 lg:flex" aria-label="Main navigation">
+          <nav
+            className="hidden items-center gap-8 lg:flex"
+            aria-label="Main navigation"
+          >
             {NAV_LINKS.map((link) => (
               <Link
                 key={link.label}
@@ -56,7 +60,11 @@ export function Navbar() {
               Log in
             </Link>
 
-            <Button size="md" className="rounded-full px-6">
+            <Button
+              onClick={() => router.push("/business/onboarding")}
+              size="md"
+              className="rounded-full px-6"
+            >
               Get Started <span className="ml-1">→</span>
             </Button>
           </div>
